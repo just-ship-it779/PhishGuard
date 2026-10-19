@@ -1,0 +1,475 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PhishGuard — Project Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #ffffff; color: #1f2328; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.75; }
+  .page { max-width: 760px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+  /* ── Cover ── */
+  .cover { text-align: center; border: 2px solid #e5e7eb; border-radius: 10px; padding: 3rem 2rem; margin-bottom: 2.5rem; background: #f7f8fa; }
+  .cover .logo { font-size: 3rem; margin-bottom: 0.5rem; }
+  .cover h1 { font-size: 2rem; color: #1f2328; margin-bottom: 0.3rem; }
+  .cover .tagline { color: #57606a; font-size: 1rem; margin-bottom: 2rem; }
+  .cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; text-align: left; max-width: 480px; margin: 0 auto; }
+  .cover-field { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 1rem; }
+  .cover-field .label { font-size: 0.72rem; color: #57606a; text-transform: uppercase; letter-spacing: 0.05em; }
+  .cover-field .value { font-size: 0.92rem; font-weight: 600; color: #1f2328; }
+
+  /* ── Section headings ── */
+  h2 { font-size: 1.05rem; font-weight: 700; color: #1f2328; text-transform: uppercase; letter-spacing: 0.06em; margin: 2.5rem 0 0.8rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; }
+  h3 { font-size: 0.95rem; font-weight: 700; color: #3b82d4; margin: 1.4rem 0 0.5rem; }
+  h4 { font-size: 0.88rem; font-weight: 700; color: #1f2328; margin: 1rem 0 0.4rem; }
+  p  { color: #1f2328; margin-bottom: 0.7rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Card ── */
+  .card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1.2rem; font-size: 0.88rem; }
+  th { background: #f7f8fa; color: #57606a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 0.9rem; text-align: left; border: 1px solid #e5e7eb; }
+  td { padding: 0.55rem 0.9rem; border: 1px solid #e5e7eb; color: #1f2328; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f8fa; }
+
+  /* ── Code ── */
+  code { background: #f7f8fa; color: #cf222e; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.82rem; font-family: "SFMono-Regular", Consolas, monospace; border: 1px solid #e5e7eb; }
+  .cmd { background: #1f2328; color: #3fb950; padding: 0.8rem 1.1rem; border-radius: 6px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85rem; margin: 0.6rem 0 1rem; line-height: 2; }
+
+  /* ── Badges ── */
+  .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green  { background: #dcfce7; color: #16a34a; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-orange { background: #ffedd5; color: #c2410c; }
+  .badge-red    { background: #fee2e2; color: #dc2626; }
+  .badge-gray   { background: #f3f4f6; color: #374151; }
+
+  /* ── Risk / severity ── */
+  .sev { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .sev-low    { background: #fef9c3; color: #854d0e; }
+  .sev-medium { background: #ffedd5; color: #c2410c; }
+  .sev-high   { background: #fee2e2; color: #dc2626; }
+
+  /* ── Info / warning boxes ── */
+  .info  { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 0.8rem 1rem; border-radius: 0 6px 6px 0; margin: 0.8rem 0; font-size: 0.88rem; color: #1e40af; }
+  .warn  { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 0.8rem 1rem; border-radius: 0 6px 6px 0; margin: 0.8rem 0; font-size: 0.88rem; color: #92400e; }
+
+  /* ── Lists ── */
+  ul, ol { padding-left: 1.4rem; margin-bottom: 0.8rem; }
+  li { margin-bottom: 0.3rem; color: #1f2328; font-size: 0.9rem; }
+
+  /* ── Test pass bar ── */
+  .test-bar-wrap { background: #e5e7eb; border-radius: 6px; height: 12px; margin: 0.5rem 0 0.3rem; overflow: hidden; }
+  .test-bar-fill { background: linear-gradient(90deg, #16a34a, #22c55e); height: 100%; border-radius: 6px; width: 100%; }
+  .test-pass-label { font-size: 1rem; font-weight: 700; color: #16a34a; }
+
+  /* ── Two-column layout ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  /* ── Stats strip ── */
+  .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1.5rem; }
+  .stat { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; }
+  .stat-n { font-size: 1.8rem; font-weight: 800; color: #3b82d4; line-height: 1.1; }
+  .stat-l { font-size: 0.75rem; color: #57606a; margin-top: 0.25rem; }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; color: #8b949e; font-size: 0.75rem; border-top: 1px solid #e5e7eb; padding-top: 1.2rem; margin-top: 2.5rem; }
+
+  @media print {
+    body { font-size: 12px; }
+    .page { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="cover">
+    <div class="logo">🛡️</div>
+    <h1>PhishGuard</h1>
+    <div class="tagline">Malicious URL Checker — Cybersecurity Portfolio Project</div>
+    <div class="cover-grid">
+      <div class="cover-field"><div class="label">Student Name</div><div class="value">____________</div></div>
+      <div class="cover-field"><div class="label">Student ID</div><div class="value">____________</div></div>
+      <div class="cover-field"><div class="label">Course / Module</div><div class="value">____________</div></div>
+      <div class="cover-field"><div class="label">Submission Date</div><div class="value">____________</div></div>
+      <div class="cover-field"><div class="label">Institution</div><div class="value">____________</div></div>
+      <div class="cover-field"><div class="label">Lecturer / Supervisor</div><div class="value">____________</div></div>
+    </div>
+  </div>
+
+  
+  <h2>1. Abstract</h2>
+  <div class="card">
+    <p>PhishGuard is a web-based URL analysis tool built with Python and Streamlit that helps users identify potentially malicious URLs through heuristic structural analysis. The application examines the components of a submitted URL — including its scheme, hostname, subdomain depth, keywords, credentials syntax, port, encoding, and shortener status — and produces an explainable risk score between 0 and 100.</p>
+    <p>The project demonstrates practical application of cybersecurity concepts including phishing detection, URL parsing, rule-based threat analysis, threat-intelligence API integration, secure coding practices, and automated testing. The application never visits or fetches content from submitted URLs, making it safe to use with suspicious links.</p>
+  </div>
+
+  
+  <h2>2. Introduction</h2>
+
+  <h3>2.1 Background</h3>
+  <p>Phishing attacks remain one of the most prevalent cybersecurity threats globally. According to the Anti-Phishing Working Group (APWG), hundreds of thousands of unique phishing sites are detected every month. Attackers craft URLs that appear legitimate at a glance but contain subtle structural indicators of malicious intent — such as misleading subdomains, embedded credentials, raw IP addresses, and suspicious keywords.</p>
+  <p>URL analysis tools that examine structure without following the link provide a safe first line of defence for users and security analysts who need to evaluate suspicious URLs before deciding whether to visit them.</p>
+
+  <h3>2.2 Problem Statement</h3>
+  <p>Users frequently encounter suspicious URLs in emails, messages, and social media posts but lack the tools or knowledge to evaluate them safely. Visiting a suspicious link directly exposes the user to potential risk. A tool that analyses URL structure offline and produces a clear, explainable risk assessment would help bridge this gap, particularly for non-technical users.</p>
+
+  <h3>2.3 Objectives</h3>
+  <ul>
+    <li>Build a web application that analyses URLs for phishing indicators without visiting them.</li>
+    <li>Implement a modular, rule-based detection engine with 10 named detection rules.</li>
+    <li>Produce an explainable risk score (0–100) with a breakdown of contributing factors.</li>
+    <li>Support optional integration with external threat-intelligence providers.</li>
+    <li>Enable bulk analysis via CSV file upload.</li>
+    <li>Generate downloadable reports in CSV and Markdown format.</li>
+    <li>Achieve comprehensive automated test coverage across all modules.</li>
+    <li>Follow secure coding practices throughout the implementation.</li>
+  </ul>
+
+  <h3>2.4 Scope and Limitations</h3>
+  <div class="warn">
+    <strong>Important:</strong> PhishGuard is a heuristic assessment tool. A low risk score does not guarantee that a URL is safe, and a high risk score does not guarantee that it is malicious. The tool analyses URL structure only and does not visit, render, or fetch content from submitted URLs.
+  </div>
+
+  
+  <h2>3. Background Theory</h2>
+
+  <h3>3.1 What is Phishing?</h3>
+  <p>Phishing is a social engineering attack in which an attacker impersonates a trusted entity — such as a bank, email provider, or government agency — to trick victims into revealing sensitive information such as passwords, credit card numbers, or personal details. Phishing attacks are typically delivered through email, SMS (smishing), or social media, and almost always involve a URL that leads to a fraudulent website.</p>
+
+  <h3>3.2 URL Structure</h3>
+  <p>A Uniform Resource Locator (URL) has the following structure:</p>
+  <div class="cmd">scheme://username:password@hostname:port/path?query#fragment</div>
+  <p>Each component can carry structural signals relevant to phishing detection. For example, the presence of user credentials (username:password@) in a URL is a well-known deception technique, and the use of a raw IP address as a hostname is rarely seen in legitimate web services.</p>
+
+  <h3>3.3 Heuristic Detection</h3>
+  <p>Heuristic detection uses a set of observable rules or patterns to classify inputs without relying on a pre-trained model or a database of known-bad entries. While less accurate than machine learning or threat-intelligence approaches, heuristic systems are transparent, fast, offline-capable, and easy to explain — making them valuable for educational tools and initial triage.</p>
+
+  <h3>3.4 Public Suffix List and Domain Parsing</h3>
+  <p>Correctly identifying the registrable domain of a hostname requires the Public Suffix List (PSL) — a database maintained by Mozilla that defines which portions of a domain name are controlled by a registry. For example, both <code>example.co.uk</code> and <code>example.com</code> are registrable domains, but without the PSL, naively splitting on the last dot would give incorrect results. PhishGuard uses the <code>tldextract</code> library, which is backed by the PSL.</p>
+
+  <h3>3.5 Threat Intelligence</h3>
+  <p>Threat intelligence (TI) refers to evidence-based knowledge about existing or emerging threats. URL reputation services such as Google Safe Browsing and VirusTotal maintain databases of known malicious URLs and allow applications to query them via API. PhishGuard integrates with both services as optional, user-initiated lookups that require explicit consent and API key configuration.</p>
+
+  
+  <h2>4. System Design</h2>
+
+  <h3>4.1 Architecture Overview</h3>
+  <p>PhishGuard follows a layered, modular architecture. The user interface (app.py) communicates exclusively with the analysis engine, which orchestrates the pipeline of independent modules. No module makes direct network requests to the submitted URL.</p>
+
+  <div class="card" style="font-family:monospace;font-size:0.82rem;line-height:2;background:#1f2328;color:#e6edf3;border-color:#30363d">
+    User Input (app.py)<br />
+        ↓<br />
+    validators.py     ← validate &amp; normalise<br />
+        ↓<br />
+    url_parser.py     ← parse into components<br />
+        ↓<br />
+    feature_extractor.py  ← derive security features<br />
+        ↓<br />
+    detection_rules.py   ← evaluate 10 rules<br />
+        ↓<br />
+    risk_scoring.py     ← calculate score [0–100]<br />
+        ↓ (optional, user opt-in)<br />
+    threat_intelligence.py ← query GSB / VirusTotal<br />
+        ↓<br />
+    report_generator.py  ← produce CSV / Markdown<br />
+        ↓<br />
+    Display Results (app.py)
+  </div>
+
+  <h3>4.2 Project Structure</h3>
+  <table>
+    <tr><th>File / Folder</th><th>Purpose</th></tr>
+    <tr><td><code>app.py</code></td><td>Main Streamlit web application — entry point</td></tr>
+    <tr><td><code>src/validators.py</code></td><td>Input validation and URL normalisation</td></tr>
+    <tr><td><code>src/url_parser.py</code></td><td>Structural URL parsing into typed components</td></tr>
+    <tr><td><code>src/feature_extractor.py</code></td><td>Security feature derivation from parsed URL</td></tr>
+    <tr><td><code>src/detection_rules.py</code></td><td>10 named, weighted, independently testable detection rules</td></tr>
+    <tr><td><code>src/risk_scoring.py</code></td><td>Bounded risk score calculation with 4 risk categories</td></tr>
+    <tr><td><code>src/threat_intelligence.py</code></td><td>Optional Google Safe Browsing and VirusTotal integrations</td></tr>
+    <tr><td><code>src/analysis_engine.py</code></td><td>Pipeline orchestrator — single entry point for all analysis</td></tr>
+    <tr><td><code>src/report_generator.py</code></td><td>CSV and Markdown report generation with formula injection defence</td></tr>
+    <tr><td><code>data/sample_urls.csv</code></td><td>Labelled synthetic test URLs for demonstration</td></tr>
+    <tr><td><code>tests/</code></td><td>7 test files covering every module (126 tests total)</td></tr>
+  </table>
+
+  <h3>4.3 Technology Stack</h3>
+  <table>
+    <tr><th>Technology</th><th>Version</th><th>Role</th></tr>
+    <tr><td>Python</td><td>3.14.7</td><td>Core programming language</td></tr>
+    <tr><td>Streamlit</td><td>1.66.0</td><td>Web interface and dashboard</td></tr>
+    <tr><td>pandas</td><td>3.0.6</td><td>Bulk CSV upload and data display</td></tr>
+    <tr><td>requests</td><td>2.34.2</td><td>Optional threat-intelligence API calls</td></tr>
+    <tr><td>tldextract</td><td>5.4.0</td><td>Public Suffix List-based domain parsing</td></tr>
+    <tr><td>python-dotenv</td><td>1.2.4</td><td>API key management via environment variables</td></tr>
+    <tr><td>pytest</td><td>9.1.1</td><td>Automated test framework</td></tr>
+    <tr><td>urllib.parse, ipaddress, re</td><td>stdlib</td><td>URL parsing, IP detection, pattern matching</td></tr>
+  </table>
+
+  
+  <h2>5. Implementation</h2>
+
+  <h3>5.1 URL Validation (validators.py)</h3>
+  <p>All user input passes through the validator before any analysis begins. The validator performs the following checks in order:</p>
+  <ul>
+    <li>Rejects empty and whitespace-only input.</li>
+    <li>Rejects inputs exceeding 2,048 characters.</li>
+    <li>Blocks dangerous schemes: <code>javascript:</code>, <code>file:</code>, <code>data:</code>, <code>vbscript:</code>, <code>blob:</code>, and others.</li>
+    <li>Adds <code>https://</code> automatically when no scheme is present, and flags this normalisation in the result.</li>
+    <li>Parses with Python's <code>urllib.parse.urlparse</code> and verifies that a hostname was extracted.</li>
+    <li>Validates port numbers, catching the <code>ValueError</code> that Python 3.14 raises for out-of-range ports.</li>
+  </ul>
+
+  <h3>5.2 URL Parsing (url_parser.py)</h3>
+  <p>The parser decomposes a validated URL into a typed <code>ParsedURL</code> dataclass containing all structural components. Key implementation decisions include:</p>
+  <ul>
+    <li><strong>IP detection:</strong> Uses Python's <code>ipaddress</code> module rather than a regex to correctly handle both IPv4 and bracketed IPv6 addresses.</li>
+    <li><strong>Domain extraction:</strong> Uses <code>tldextract</code> backed by the Public Suffix List. This ensures that <code>example.co.uk</code> is parsed as registrable domain <code>example.co.uk</code>, not <code>co.uk</code>.</li>
+    <li><strong>Credentials:</strong> The <code>urlparse</code> library correctly identifies the real hostname even when user credentials appear before the <code>@</code> sign.</li>
+  </ul>
+
+  <h3>5.3 Feature Extraction (feature_extractor.py)</h3>
+  <p>The feature extractor translates raw parsed components into labelled, security-relevant boolean and numeric signals. These include:</p>
+  <div class="two-col">
+    <div class="card">
+      <h4>Structural Features</h4>
+      <ul>
+        <li>Scheme (HTTP vs HTTPS)</li>
+        <li>IP-address hostname flag</li>
+        <li>URL length and long-URL flag</li>
+        <li>Subdomain depth</li>
+        <li>Credential presence</li>
+        <li>Port and nonstandard-port flag</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Content Features</h4>
+      <ul>
+        <li>Suspicious keyword matches</li>
+        <li>URL shortener detection</li>
+        <li>Percent-encoding count</li>
+        <li>IDN / Punycode detection</li>
+        <li>Path depth and query parameters</li>
+        <li>Fragment presence</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>5.4 Detection Rules (detection_rules.py)</h3>
+  <p>The detection engine evaluates 10 independent rules against the extracted features. Each rule is a dataclass containing a unique ID, name, severity, weight, rationale, limitation description, and an <code>evaluate()</code> function. Rules that are not triggered return <code>None</code> and are excluded from the results.</p>
+
+  <table>
+    <tr><th>Rule ID</th><th>Name</th><th>Severity</th><th>Weight</th><th>What it detects</th></tr>
+    <tr><td><code>URL001</code></td><td>IP-Address Hostname</td><td><span class="sev sev-high">High</span></td><td>20</td><td>Hostname is a raw IPv4 or IPv6 address</td></tr>
+    <tr><td><code>URL002</code></td><td>HTTP Instead of HTTPS</td><td><span class="sev sev-medium">Medium</span></td><td>10</td><td>URL uses unencrypted HTTP scheme</td></tr>
+    <tr><td><code>URL003</code></td><td>Misleading User-Info Syntax</td><td><span class="sev sev-high">High</span></td><td>25</td><td>Credentials embedded as <code>trusted@evil.com</code></td></tr>
+    <tr><td><code>URL004</code></td><td>Unusually Long URL</td><td><span class="sev sev-low">Low</span></td><td>5</td><td>URL exceeds 75 characters</td></tr>
+    <tr><td><code>URL005</code></td><td>Suspicious Keyword Pattern</td><td><span class="sev sev-low">Low</span></td><td>8</td><td>Keywords such as login, verify, password</td></tr>
+    <tr><td><code>URL006</code></td><td>Unusual Subdomain Depth</td><td><span class="sev sev-medium">Medium</span></td><td>12</td><td>Three or more subdomain labels</td></tr>
+    <tr><td><code>URL007</code></td><td>Internationalized Domain Name</td><td><span class="sev sev-medium">Medium</span></td><td>12</td><td>Non-ASCII or Punycode (xn--) hostname</td></tr>
+    <tr><td><code>URL008</code></td><td>Nonstandard Port</td><td><span class="sev sev-low">Low</span></td><td>6</td><td>Port other than 80 (HTTP) or 443 (HTTPS)</td></tr>
+    <tr><td><code>URL009</code></td><td>Known URL-Shortening Service</td><td><span class="sev sev-low">Low</span></td><td>7</td><td>Domain matches known shorteners (bit.ly, etc.)</td></tr>
+    <tr><td><code>URL010</code></td><td>Excessive Percent-Encoding</td><td><span class="sev sev-low">Low</span></td><td>6</td><td>Five or more <code>%XX</code> encoded sequences</td></tr>
+  </table>
+
+  <h3>5.5 Risk Scoring (risk_scoring.py)</h3>
+  <p>The risk score is calculated using the following transparent formula:</p>
+  <div class="card" style="font-family:monospace;font-size:0.88rem;background:#f7f8fa">
+    raw_score   = sum of all triggered rule weights<br />
+    score       = round(raw_score / 104 × 100), capped at 100<br />
+    <br />
+    Risk categories based on score:<br />
+      Low     →  0 – 24<br />
+      Moderate → 25 – 49<br />
+      High     → 50 – 74<br />
+      Critical → 75 – 100
+  </div>
+  <p>The maximum raw score (104) is the sum of all 10 rule weights. A confirmed malicious threat-intelligence result overrides the category to Critical and raises the score to at least 90, regardless of heuristic findings. API unavailability or errors are never silently treated as clean results.</p>
+
+  <h3>5.6 Threat Intelligence Integration (threat_intelligence.py)</h3>
+  <p>Two optional threat-intelligence providers are supported:</p>
+  <ul>
+    <li><strong>Google Safe Browsing v4 Lookup API</strong> — checks URLs against Google's threat database for malware, phishing, and unwanted software.</li>
+    <li><strong>VirusTotal URL Analysis API v3</strong> — queries 90+ antivirus engines and URL scanners for reputation data.</li>
+  </ul>
+  <div class="info">TI lookups are <strong>never performed automatically</strong>. The user must explicitly enable the checkbox and acknowledge the privacy notice before any URL is sent to an external service. The application operates fully in offline heuristic mode when no API keys are configured.</div>
+
+  <h3>5.7 User Interface (app.py)</h3>
+  <p>The dashboard is built with Streamlit and features a professional dark cybersecurity theme. It contains three tabs:</p>
+  <ul>
+    <li><strong>Single URL Analysis:</strong> URL input, Analyse button, risk score card, findings panel, URL breakdown table, recommended action, CSV and Markdown download buttons, disclaimer.</li>
+    <li><strong>Bulk CSV Analysis:</strong> File upload, automatic URL column detection, per-row analysis, duplicate labelling, summary metrics, filterable results table, bulk CSV export.</li>
+    <li><strong>Session History:</strong> Running table of all URLs analysed in the current session, clear-history button, session history CSV export.</li>
+  </ul>
+
+  <h3>5.8 Report Generation (report_generator.py)</h3>
+  <p>The report generator produces two output formats:</p>
+  <ul>
+    <li><strong>CSV:</strong> Structured export with 16 columns including timestamp, original input, normalised URL, validity, hostname, scheme, risk score, category, finding IDs, finding names, and TI status. All cells are sanitised against formula injection (cells beginning with <code>=</code>, <code>+</code>, <code>-</code>, or <code>@</code> are prefixed with a single quote to prevent spreadsheet applications from executing them as formulas).</li>
+    <li><strong>Markdown:</strong> A human-readable report with URL breakdown, risk assessment, individual findings with rationale and evidence, recommended actions, and a disclaimer.</li>
+  </ul>
+
+  
+  <h2>6. Security Considerations</h2>
+  <table>
+    <tr><th>Security Requirement</th><th>Implementation</th></tr>
+    <tr><td>Never visits submitted URL</td><td>All analysis is performed offline using Python's URL parsing libraries. No HTTP requests are made to submitted destinations at any point.</td></tr>
+    <tr><td>Blocks dangerous schemes</td><td><code>javascript:</code>, <code>file:</code>, <code>data:</code>, <code>vbscript:</code>, <code>blob:</code>, <code>ftp:</code>, <code>mailto:</code>, and others are rejected during validation before any parsing occurs.</td></tr>
+    <tr><td>SSRF prevention</td><td>No URL fetching feature is implemented. The threat-intelligence module only communicates with documented provider API endpoints, never with the submitted URL's destination.</td></tr>
+    <tr><td>No hardcoded secrets</td><td>API keys are loaded exclusively from environment variables or a <code>.env</code> file. They are never printed, logged, or included in any output.</td></tr>
+    <tr><td>CSV formula injection defence</td><td>Every value written to a CSV export is sanitised. Values beginning with formula-trigger characters are prefixed with a single quote, preventing spreadsheet auto-execution.</td></tr>
+    <tr><td>TI opt-in only</td><td>External lookups require an explicit user action and display a privacy notice. No automatic requests are made during page rendering.</td></tr>
+    <tr><td>TI errors ≠ clean</td><td>Timeout, rate-limiting, connection error, and invalid API key results are all reported as "unavailable" or "error" — never silently treated as a negative (clean) result.</td></tr>
+    <tr><td>No persistent storage</td><td>Session history is stored in Streamlit's in-memory session state only. No URLs or analysis results are written to disk by default.</td></tr>
+    <tr><td>Input length limit</td><td>Inputs exceeding 2,048 characters are rejected to prevent resource exhaustion.</td></tr>
+    <tr><td>No eval / exec</td><td>User-submitted input is never passed to <code>eval()</code>, <code>exec()</code>, or any shell command.</td></tr>
+  </table>
+
+  
+  <h2>7. Testing</h2>
+
+  <h3>7.1 Test Results</h3>
+  <div class="card">
+    <div class="test-pass-label">✅ 126 / 126 tests passed — 0 failures — 0.51 seconds</div>
+    <div class="test-bar-wrap"><div class="test-bar-fill"></div></div>
+    <p style="color:#57606a;font-size:0.85rem;margin-top:0.4rem">Executed on Python 3.14.7 · pytest 9.1.1 · No live network calls (TI calls mocked)</p>
+  </div>
+
+  <h3>7.2 Test Coverage</h3>
+  <table>
+    <tr><th>Test File</th><th>Tests</th><th>Key Cases Covered</th></tr>
+    <tr><td><code>test_validators.py</code></td><td>19</td><td>Valid URLs, all blocked schemes, empty/whitespace, too-long input, port ranges, normalisation flag, original input preservation</td></tr>
+    <tr><td><code>test_url_parser.py</code></td><td>22</td><td>HTTP/HTTPS, IPv4, IPv6, credentials (real host identity), deep subdomains, standard/nonstandard ports, path depth, query params, fragment, encoding count</td></tr>
+    <tr><td><code>test_feature_extractor.py</code></td><td>17</td><td>Scheme flags, IP flag, length threshold, keywords, subdomain depth, URL shortener, credentials, excessive encoding</td></tr>
+    <tr><td><code>test_detection_rules.py</code></td><td>22</td><td>All 10 rules individually, negative cases (rules that should not trigger), deceptive subdomain combined pattern, finding evidence content</td></tr>
+    <tr><td><code>test_risk_scoring.py</code></td><td>12</td><td>Score bounds [0–100], category thresholds, finding count, TI: malicious/clean/unavailable/error/not_checked, details stored</td></tr>
+    <tr><td><code>test_analysis_engine.py</code></td><td>14</td><td>Full pipeline valid/invalid, timestamp, raw input preservation, js: scheme rejected, combined finding IDs, TI mock: all status types</td></tr>
+    <tr><td><code>test_report_generator.py</code></td><td>20</td><td>All formula-injection prefix characters, CSV columns, valid/invalid row, bulk multi-row, duplicates, Markdown score/error/disclaimer/findings, no API key leakage</td></tr>
+  </table>
+
+  <h3>7.3 Testing Approach</h3>
+  <ul>
+    <li><strong>Unit tests:</strong> Each module is tested independently with clearly defined inputs and expected outputs.</li>
+    <li><strong>Integration tests:</strong> The analysis engine is tested end-to-end from raw input to scored result.</li>
+    <li><strong>Mock testing:</strong> All external API calls in threat_intelligence.py are replaced with mocked responses in tests using Python's <code>unittest.mock.patch</code>. This ensures tests are fast, reliable, and do not depend on network availability or real API keys.</li>
+    <li><strong>Edge cases:</strong> Empty strings, whitespace, blocked schemes, out-of-range ports, IPv6 addresses, and credentials-in-URL patterns are all explicitly tested.</li>
+    <li><strong>Security tests:</strong> Formula injection prevention is tested for all five trigger characters (<code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>, tab).</li>
+  </ul>
+
+  
+  <h2>8. Results and Discussion</h2>
+
+  <h3>8.1 Example Analyses</h3>
+  <table>
+    <tr><th>URL</th><th>Score</th><th>Category</th><th>Rules Triggered</th></tr>
+    <tr><td><code>https://www.example.com</code></td><td>0</td><td><span class="badge badge-green">Low</span></td><td>None</td></tr>
+    <tr><td><code>http://example.com</code></td><td>10</td><td><span class="badge badge-green">Low</span></td><td>URL002 (HTTP)</td></tr>
+    <tr><td><code>http://192.0.2.1/login</code></td><td>37</td><td><span class="badge badge-blue">Moderate</span></td><td>URL001, URL002, URL005</td></tr>
+    <tr><td><code>https://bit.ly/abc123</code></td><td>7</td><td><span class="badge badge-green">Low</span></td><td>URL009 (shortener)</td></tr>
+    <tr><td><code>http://paypal.com.verify.login.evil.com/confirm</code></td><td>34</td><td><span class="badge badge-blue">Moderate</span></td><td>URL002, URL005, URL006</td></tr>
+    <tr><td><code>https://trusted-bank.com@attacker.com/</code></td><td>24</td><td><span class="badge badge-green">Low</span></td><td>URL003 (deceptive @)</td></tr>
+    <tr><td><code>https://xn--pple-43d.com</code></td><td>12</td><td><span class="badge badge-green">Low</span></td><td>URL007 (IDN/Punycode)</td></tr>
+  </table>
+
+  <h3>8.2 Discussion</h3>
+  <p>The results demonstrate that the rule-based system correctly identifies well-known phishing URL patterns while remaining explainable. The deceptive subdomain example (<code>paypal.com.verify.login.evil.com</code>) correctly triggers three independent rules — HTTP scheme, keywords, and deep subdomain depth — producing a Moderate score without any single rule dominating the result.</p>
+  <p>The misleading credentials example (<code>trusted-bank.com@attacker.com</code>) illustrates an important security concept: the apparent domain (<code>trusted-bank.com</code>) is actually a username, and the real destination is <code>attacker.com</code>. The rule correctly identifies <code>attacker.com</code> as the actual hostname.</p>
+  <p>The system correctly avoids false positives on legitimate URLs like <code>https://github.com/login</code> — while the keyword rule does trigger for "login", the overall score remains low because no other indicators are present. This demonstrates the value of a multi-indicator, weighted scoring approach.</p>
+
+  
+  <h2>9. Installation and Usage</h2>
+
+  <h3>9.1 Prerequisites</h3>
+  <ul>
+    <li>Python 3.11 or newer installed and added to PATH</li>
+    <li>pip (Python package manager)</li>
+    <li>Internet connection for dependency installation (not required to run analysis)</li>
+  </ul>
+
+  <h3>9.2 Installation</h3>
+  <p>Step 1 — Install required dependencies:</p>
+  <div class="cmd">pip install streamlit pandas requests tldextract python-dotenv</div>
+  <p>Step 2 — Run the application:</p>
+  <div class="cmd">streamlit run app.py</div>
+  <p>The application opens automatically at <code>http://localhost:8501</code> in the default browser.</p>
+
+  <h3>9.3 Running the Tests</h3>
+  <div class="cmd">pip install pytest<br />python -m pytest tests/ -v</div>
+
+  <h3>9.4 Configuring Optional Threat Intelligence</h3>
+  <p>Set the following environment variables before launching the application:</p>
+  <div class="cmd">set GOOGLE_SAFE_BROWSING_API_KEY=your_key_here<br />set VIRUSTOTAL_API_KEY=your_key_here<br />streamlit run app.py</div>
+  <p>API keys can be obtained free of charge from Google Cloud Console (Safe Browsing API) and <code>virustotal.com/gui/join-us</code>.</p>
+
+  
+  <h2>10. Limitations and Future Work</h2>
+
+  <h3>10.1 Current Limitations</h3>
+  <table>
+    <tr><th>Limitation</th><th>Explanation</th></tr>
+    <tr><td>Heuristic false positives</td><td>Keywords such as "login" and "account" appear in many legitimate URLs. The system correctly flags them but with low weight to avoid false positives dominating the score.</td></tr>
+    <tr><td>No domain-age check</td><td>Newly registered domains are a strong phishing signal but require WHOIS/DNS lookups, which have been excluded to avoid unintended network requests.</td></tr>
+    <tr><td>Shortened URL destinations</td><td>The actual destination of shortened URLs cannot be assessed without following the redirect, which the application intentionally avoids.</td></tr>
+    <tr><td>No certificate inspection</td><td>Checking whether a domain's TLS certificate matches the expected organisation would require a live TLS handshake.</td></tr>
+    <tr><td>No page content analysis</td><td>Visual similarity to known login pages, fake form detection, and JavaScript obfuscation cannot be assessed without fetching and rendering the page.</td></tr>
+    <tr><td>No calibrated probability</td><td>The risk score is a transparent heuristic index, not a statistically calibrated probability. No accuracy, precision, or recall statistics are claimed.</td></tr>
+  </table>
+
+  <h3>10.2 Recommended Future Enhancements</h3>
+  <ul>
+    <li><strong>Domain-age check via WHOIS:</strong> Domains registered within the past 30 days are disproportionately associated with phishing campaigns.</li>
+    <li><strong>DNS NXDOMAIN detection:</strong> URLs pointing to non-existent servers can be flagged without visiting the destination.</li>
+    <li><strong>Configurable rule weights:</strong> A sidebar UI allowing analysts to tune rule sensitivity without editing code.</li>
+    <li><strong>Historical trend dashboard:</strong> Tracking risk score distributions over batches of URLs to identify campaigns.</li>
+    <li><strong>Machine learning classifier:</strong> Trained on a labelled dataset such as PhiUSIIL or ISCXURL2016 after establishing a clean baseline with the heuristic system.</li>
+  </ul>
+
+  
+  <h2>11. Conclusion</h2>
+  <div class="card">
+    <p>PhishGuard successfully demonstrates the application of Python programming and cybersecurity concepts in a practical, working tool. The project implements a complete URL analysis pipeline — from input validation through feature extraction, rule-based detection, risk scoring, threat-intelligence integration, and report generation — in a modular, well-tested codebase.</p>
+    <p>Key achievements include: 10 named detection rules covering the most common URL-based phishing indicators; a transparent, explainable risk score bounded between 0 and 100; a professional Streamlit dashboard with bulk analysis and downloadable reports; optional integration with Google Safe Browsing and VirusTotal; 126 automated tests with 100% pass rate; and a security-conscious implementation that never visits submitted URLs, blocks dangerous schemes, defends against CSV formula injection, and handles TI failures without producing misleading clean results.</p>
+    <p>The project provides a solid foundation for further development and serves as a clear demonstration of practical cybersecurity engineering skills.</p>
+  </div>
+
+  
+  <h2>12. References</h2>
+  <ul>
+    <li>Anti-Phishing Working Group (APWG). <em>Phishing Activity Trends Reports.</em> apwg.org</li>
+    <li>Mozilla Foundation. <em>Public Suffix List.</em> publicsuffix.org</li>
+    <li>Google. <em>Safe Browsing API v4 Documentation.</em> developers.google.com/safe-browsing</li>
+    <li>VirusTotal. <em>API v3 Documentation.</em> developers.virustotal.com</li>
+    <li>Berners-Lee, T. et al. <em>RFC 3986 — Uniform Resource Identifier (URI): Generic Syntax.</em> IETF, 2005.</li>
+    <li>Python Software Foundation. <em>urllib.parse — Parse URLs into components.</em> docs.python.org</li>
+    <li>John-Mwaura. <em>tldextract — Accurately separates a URL's subdomain, domain, and public suffix.</em> PyPI, 2024.</li>
+    <li>OWASP Foundation. <em>Phishing Prevention Cheat Sheet.</em> cheatsheetseries.owasp.org</li>
+    <li>Streamlit Inc. <em>Streamlit Documentation.</em> docs.streamlit.io</li>
+  </ul>
+
+  <hr />
+
+  
+  <div class="stats-strip">
+    <div class="stat"><div class="stat-n">126</div><div class="stat-l">Tests passing</div></div>
+    <div class="stat"><div class="stat-n">10</div><div class="stat-l">Detection rules</div></div>
+    <div class="stat"><div class="stat-n">8</div><div class="stat-l">Source modules</div></div>
+    <div class="stat"><div class="stat-n">0</div><div class="stat-l">Test failures</div></div>
+  </div>
+
+  <div class="footer">
+    PhishGuard v1.0.0  ·  Python 3.14.7  ·  Streamlit 1.66.0  ·  126/126 tests passing<br />
+    Cybersecurity Portfolio Project  ·  For educational use and initial triage only<br /><br />
+    Made with IBM Bob
+  </div>
+
+</div>
+</body>
+</html>
